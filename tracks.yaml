@@ -24,4 +24,4 @@ tracks:
     ros_distro: humble
     vcs_type: git
     vcs_uri: https://github.com/blackcoffeerobotics/vector_pursuit_controller.git
-    version: 1.0.1
+    version: 1.0.2
