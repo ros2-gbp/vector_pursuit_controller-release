@@ -1,4 +1,5 @@
 import os
+
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import IncludeLaunchDescription
@@ -41,7 +42,7 @@ def generate_launch_description():
         name='behavior_server',
         output='screen',
         parameters=[params_file],
-        remappings=remappings)
+        remappings=remappings + [('cmd_vel', 'bcr_bot/cmd_vel')])
 
     bt_navigator = Node(
         package='nav2_bt_navigator',
@@ -59,9 +60,9 @@ def generate_launch_description():
         parameters=[params_file])
 
     rviz_launch_cmd = Node(
-        package="rviz2",
-        executable="rviz2",
-        name="rviz2",
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
         arguments=[
             '-d' + os.path.join(
                 get_package_share_directory('nav2_bringup'),
@@ -77,6 +78,15 @@ def generate_launch_description():
         name='map_server',
         output='screen',
         parameters=[{'yaml_filename': os.path.join(pkg_vp, 'config', 'bcr_map.yaml')}],
+    )
+
+    smoother_server = Node(
+        package='nav2_smoother',
+        executable='smoother_server',
+        name='smoother_server',
+        output='screen',
+        parameters=[params_file],
+        remappings=remappings,
     )
 
     static_transform_publisher_node = Node(
@@ -96,5 +106,6 @@ def generate_launch_description():
         lifecycle_manager,
         rviz_launch_cmd,
         map_server_node,
+        smoother_server,
         static_transform_publisher_node
     ])

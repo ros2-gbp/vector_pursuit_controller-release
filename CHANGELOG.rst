@@ -2,14 +2,17 @@
 Changelog for package vector_pursuit_controller
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1.0.2 (2026-01-02)
+2.0.0 (2026-01-02)
 ------------------
-* Fix minor: minor typo
-* FIX: typo in turning_radius
-* Added unit test for Ackermann constraints (`#14 <https://github.com/blackcoffeerobotics/vector_pursuit_controller/issues/14>`_)
-* Fixed angle calculations and out of bounds errors for the main implementation
+* Prevent overshoot for final rotation
+* Contributors: Tatsuro Sakaguchi
+
+1.1.0 (2025-05-25)
+-----------
+* Added jazzy compliant params and launch file
+* Fix include paths to comply with nav2 jazzy, improve variable naming in controller and fix linting issues
 * Update install binary (`#3 <https://github.com/blackcoffeerobotics/vector_pursuit_controller/issues/3>`_)
-* Contributors: Kostubh, Kostubh Khandelwal
+* Contributors: Kostubh Khandelwal(exMachina316)
 
 1.0.1 (2024-09-03)
 ------------------

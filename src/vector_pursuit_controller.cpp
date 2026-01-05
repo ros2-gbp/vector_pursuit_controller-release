@@ -24,7 +24,7 @@
 
 #include "vector_pursuit_controller/vector_pursuit_controller.hpp"
 #include "angles/angles.h"
-#include "nav2_core/exceptions.hpp"
+#include "nav2_core/planner_exceptions.hpp"
 #include "nav2_util/node_utils.hpp"
 #include "nav2_costmap_2d/costmap_filters/filter_values.hpp"
 
@@ -281,11 +281,10 @@ double VectorPursuitController::calcTurningRadius(
       double phi_1 = std::atan2(
         (2 * std::pow(target_pose.pose.position.y, 2) - std::pow(distance, 2)),
         (2 * target_pose.pose.position.x * target_pose.pose.position.y));
-      double term_2 = std::pow(distance, 2) / (2 * target_pose.pose.position.y);
-      double phi_2 = std::atan2(term_2, 0.0);
-      double phi = angles::normalize_angle_positive(phi_1 - phi_2);
-      phi = std::max(phi, 1.0e-9);
+      double phi_2 = std::atan2(std::pow(distance, 2), (2 * target_pose.pose.position.y));
+      double phi = angles::normalize_angle(phi_1 - phi_2);
       double term_1 = (k_ * phi) / (((k_ - 1) * phi) + target_angle);
+      double term_2 = std::pow(distance, 2) / (2 * target_pose.pose.position.y);
       turning_radius = std::abs(term_1 * term_2);
     } else {
       // Handle case when target is directly ahead
@@ -354,6 +353,7 @@ geometry_msgs::msg::TwistStamped VectorPursuitController::computeVelocityCommand
   if (shouldRotateToGoalHeading(lookahead_point)) {
     double angle_to_goal = tf2::getYaw(transformed_plan.poses.back().pose.orientation);
     rotateToHeading(linear_vel, angular_vel, angle_to_goal, last_cmd_vel_);
+    applyAngularBraking(angular_vel, angle_to_goal, last_cmd_vel_);
   } else if (shouldRotateToPath(lookahead_point, angle_to_heading, sign)) {
     rotateToHeading(linear_vel, angular_vel, angle_to_heading, last_cmd_vel_);
   } else {
@@ -674,6 +674,19 @@ void VectorPursuitController::rotateToHeading(
   angular_vel = std::clamp(angular_vel, min_feasible_angular_speed, max_feasible_angular_speed);
 }
 
+void VectorPursuitController::applyAngularBraking(
+  double & angular_vel, const double & angle_to_path, const geometry_msgs::msg::Twist & curr_speed)
+{
+  const double sign = angle_to_path > 0.0 ? 1.0 : -1.0;
+  const double time_to_stop = std::abs(curr_speed.angular.z) / max_angular_accel_;
+  const double angle_to_stop = sign * 0.5 * max_angular_accel_ * std::pow(time_to_stop, 2) +
+                               curr_speed.angular.z * time_to_stop;
+  if (std::abs(angle_to_stop) >= std::abs(angle_to_path)) {
+    // Need to start braking to avoid overshoot
+    angular_vel = sign * std::max(0.0, std::abs(curr_speed.angular.z) - max_angular_accel_ * control_duration_);
+  }
+}
+
 bool VectorPursuitController::isCollisionImminent(
   const geometry_msgs::msg::PoseStamped & robot_pose,
   const double & linear_vel, const double & angular_vel,
@@ -881,8 +894,8 @@ nav_msgs::msg::Path VectorPursuitController::transformGlobalPlan(
   // Find points up to max_transform_dist so we only transform them.
   auto transformation_end = std::find_if(
     transformation_begin, global_plan_.poses.end(),
-    [&](const auto & pose) {
-      return euclidean_distance(pose, robot_pose) > max_costmap_extent;
+    [&](const auto & plan_pose) {
+      return euclidean_distance(plan_pose, robot_pose) > max_costmap_extent;
     });
 
   // Lambda to transform a PoseStamped from global frame to local
