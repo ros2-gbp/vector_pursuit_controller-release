@@ -1,3 +1,26 @@
+## vector_pursuit_controller (jazzy) - 2.0.0-1
+
+The packages in the `vector_pursuit_controller` repository were released into the `jazzy` distro by running `/usr/bin/bloom-release --new-track --rosdistro jazzy --track jazzy vector_pursuit_controller` on `Mon, 05 Jan 2026 05:41:09 -0000`
+
+The `vector_pursuit_controller` package was released.
+
+Version of package(s) in repository `vector_pursuit_controller`:
+
+- upstream repository: https://github.com/blackcoffeerobotics/vector_pursuit_controller.git
+- release repository: unknown
+- rosdistro version: `null`
+- old version: `null`
+- new version: `2.0.0-1`
+
+Versions of tools used:
+
+- bloom version: `0.13.0`
+- catkin_pkg version: `1.1.0`
+- rosdep version: `0.26.0`
+- rosdistro version: `1.0.1`
+- vcstools version: `0.1.42`
+
+
 ## vector_pursuit_controller (humble) - 1.0.2-2
 
 The packages in the `vector_pursuit_controller` repository were released into the `humble` distro by running `/usr/bin/bloom-release --rosdistro humble --track humble vector_pursuit_controller --edit` on `Fri, 02 Jan 2026 13:51:51 -0000`
